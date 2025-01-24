@@ -3,23 +3,35 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 // album represents data about a record album.
 type record struct {
-	ID       string `json:"id"` // если с маленькой буквы -- то не экспортируется в json
-	PillName string `json:"pillName"`
-	DueDate  string `json:"dueDate"` // дата, когда нужно принять препарат
-	Status   bool   `json:"status"`
+	ID       string    `json:"id"` // если с маленькой буквы -- то не экспортируется в json
+	PillName string    `json:"pillName"`
+	DueDate  time.Time `json:"dueDate" time_format:"2006-01-02"` // дата, когда нужно принять препарат
+	Status   bool      `json:"status"`
 }
 
 // records slice to seed record album data.
 var records = []record{
-	{ID: "1", PillName: "Yarina", DueDate: "2024-11-28", Status: true},
-	{ID: "2", PillName: "Cetrine", DueDate: "2024-11-29", Status: false},
-	{ID: "3", PillName: "Berocca", DueDate: "2024-11-27", Status: true},
+	{ID: "1", PillName: "Yarina", DueDate: mustParseDate("2024-11-28"), Status: true},
+	{ID: "2", PillName: "Cetrine", DueDate: mustParseDate("2024-11-29"), Status: false},
+	{ID: "3", PillName: "Berocca", DueDate: mustParseDate("2024-11-27"), Status: true},
+}
+
+// mustParseDate parses a date string and panics if there is an error.
+func mustParseDate(dateStr string) time.Time {
+	// Определите формат даты
+	var layout = "2006-01-02" // Пример формата: "YYYY-MM-DD"
+	t, err := time.Parse(layout, dateStr)
+	if err != nil {
+		panic(err)
+	}
+	return t
 }
 
 func main() {
@@ -37,17 +49,24 @@ func getRecords(c *gin.Context) {
 	// Получение query параметров
 	pillName := c.Query("pillName")
 	dueDate := c.Query("dueDate")
+	fromDate := c.Query("fromDate")
+	toDate := c.Query("toDate")
 	statusStr := c.Query("status")
-	status, _ := strconv.ParseBool(statusStr)
+	// Трансформация входных параметров
 	filteredRecords := records
 	if pillName != "" {
 		filteredRecords = filterByName(filteredRecords, pillName)
 	}
 	if dueDate != "" {
-		filteredRecords = filterByDate(filteredRecords, dueDate)
+		date := mustParseDate(dueDate)
+		filteredRecords = filterByDate(filteredRecords, date)
 	}
 	if statusStr != "" {
+		status, _ := strconv.ParseBool(statusStr)
 		filteredRecords = filterByStatus(filteredRecords, status)
+	}
+	if fromDate != "" && toDate != "" {
+		filteredRecords = filterByInterval(filteredRecords, mustParseDate(fromDate), mustParseDate(toDate))
 	}
 	c.IndentedJSON(http.StatusOK, filteredRecords)
 }

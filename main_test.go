@@ -14,9 +14,9 @@ import (
 func TestGetRecords(t *testing.T) {
 	// records slice to seed record album data.
 	var records = []record{
-		{ID: "1", PillName: "Yarina", DueDate: "2024-11-28", Status: true},
-		{ID: "2", PillName: "Cetrine", DueDate: "2024-11-29", Status: false},
-		{ID: "3", PillName: "Berocca", DueDate: "2024-11-27", Status: true},
+		{ID: "1", PillName: "Yarina", DueDate: mustParseDate("2024-11-28"), Status: true},
+		{ID: "2", PillName: "Cetrine", DueDate: mustParseDate("2024-11-29"), Status: false},
+		{ID: "3", PillName: "Berocca", DueDate: mustParseDate("2024-11-27"), Status: true},
 	}
 	// Создаем тестовый маршрутизатор
 	router := gin.Default()
