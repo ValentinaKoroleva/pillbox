@@ -1,0 +1,229 @@
+{
+	"info": {
+		"_postman_id": "9c85739a-e0cb-4713-8467-e8738b14fed5",
+		"name": "pillboxCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20947933",
+		"_collection_link": "https://bold-equinox-398185.postman.co/workspace/Team-Workspace~66d03ef2-c2d1-44bf-83fa-35d52c39caa4/collection/20947933-9c85739a-e0cb-4713-8467-e8738b14fed5?action=share&source=collection_link&creator=20947933"
+	},
+	"item": [
+		{
+			"name": "getRecordByDate",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/records?dueDate=2024-11-29",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"records"
+					],
+					"query": [
+						{
+							"key": "dueDate",
+							"value": "2024-11-29"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getRecordByInterval",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/records?fromDate=2025-11-29&toDate=2025-11-30",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"records"
+					],
+					"query": [
+						{
+							"key": "fromDate",
+							"value": "2025-11-29"
+						},
+						{
+							"key": "toDate",
+							"value": "2025-11-30"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getRecordByName",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/records?pillName=Cetrine",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"records"
+					],
+					"query": [
+						{
+							"key": "pillName",
+							"value": "Cetrine"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getRecordByStatus",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/records?status=false",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"records"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getAllRecords",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/records",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createRecord",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"id\": \"4\",\"pillName\": \"The Modern Sound of Betty Carter\",\"dueDate\": \"2024-11-30\",\"status\": true}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/records",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteRecord",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/records/4",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"records",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "changeRecord",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"pillName\": \"Aspirin\",\"dueDate\": \"2024-11-30\",\"status\": false}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/records/3",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"records",
+						"3"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
