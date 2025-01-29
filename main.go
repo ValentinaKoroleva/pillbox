@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -41,7 +42,9 @@ func main() {
 	router.GET("/records/:id", getRecordByID)
 	router.DELETE("/records/:id", deleteRecordByID)
 	router.PATCH("/records/:id", updateRecordByID)
-	router.Run("localhost:8080")
+	if err := router.Run("localhost:8080"); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
 }
 
 // getAlbums responds with the list of all albums as JSON.

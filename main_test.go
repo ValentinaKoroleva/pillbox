@@ -43,3 +43,24 @@ func TestGetRecords(t *testing.T) {
 	// Проверяем тело ответа
 	assert.Equal(t, string(recordsJSON), responseString)
 }
+
+// Benchmark for getRecords
+func BenchmarkGetRecords(b *testing.B) {
+	// Создаем тестовый маршрутизатор
+	router := gin.Default()
+	router.GET("/records", getRecords)
+
+	// Создаем тестовый запрос
+	req, err := http.NewRequest("GET", "/records", nil)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	// Создаем тестовый рекордер для записи ответа
+	w := httptest.NewRecorder()
+
+	// Обрабатываем запрос
+	for i := 0; i < b.N; i++ {
+		router.ServeHTTP(w, req)
+	}
+}
