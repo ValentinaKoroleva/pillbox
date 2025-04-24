@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 func filterByName(records []record, pillName string) []record {
 	filteredRecords := make([]record, 0)
 	for _, a := range records {
@@ -14,7 +10,7 @@ func filterByName(records []record, pillName string) []record {
 	return filteredRecords
 }
 
-func filterByDate(records []record, dueDate time.Time) []record {
+func filterByDate(records []record, dueDate CustomDate) []record {
 	filteredRecords := make([]record, 0)
 	for _, a := range records {
 		if a.DueDate == dueDate {
@@ -24,7 +20,7 @@ func filterByDate(records []record, dueDate time.Time) []record {
 	return filteredRecords
 }
 
-func filterByInterval(records []record, fromDate time.Time, toDate time.Time) []record {
+func filterByInterval(records []record, fromDate CustomDate, toDate CustomDate) []record {
 	filteredRecords := make([]record, 0)
 	for _, a := range records {
 		if a.DueDate.Before(toDate.AddDate(0, 0, 1)) && a.DueDate.After(fromDate.AddDate(0, 0, -1)) {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -9,30 +10,54 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// album represents data about a record album.
-type record struct {
-	ID       string    `json:"id"` // если с маленькой буквы -- то не экспортируется в json
-	PillName string    `json:"pillName"`
-	DueDate  time.Time `json:"dueDate" time_format:"2006-01-02"` // дата, когда нужно принять препарат
-	Status   bool      `json:"status"`
+type CustomDate struct {
+	time.Time
 }
 
-// records slice to seed record album data.
-var records = []record{
-	{ID: "1", PillName: "Yarina", DueDate: mustParseDate("2024-11-28"), Status: true},
-	{ID: "2", PillName: "Cetrine", DueDate: mustParseDate("2024-11-29"), Status: false},
-	{ID: "3", PillName: "Berocca", DueDate: mustParseDate("2024-11-27"), Status: true},
+// Запись о таблетке
+type record struct {
+	ID       string     `json:"id"` // если с маленькой буквы -- то не экспортируется в json
+	PillName string     `json:"pillName"`
+	DueDate  CustomDate `json:"dueDate"` // дата, когда нужно принять препарат
+	Status   bool       `json:"status"`
+}
+
+// Реализуем UnmarshalJSON для парсинга строки в дату
+func (cd *CustomDate) UnmarshalJSON(data []byte) error {
+	var dateStr string
+	if err := json.Unmarshal(data, &dateStr); err != nil {
+		return err
+	}
+	parsedTime, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		return err
+	}
+	cd.Time = parsedTime
+	return nil
+}
+
+var records []record
+
+// Инициализация данных (вызывается автоматически при старте программы)
+func init() {
+	jsonData := `[
+		{"id": "1", "pillName": "Yarina", "dueDate": "2024-11-29", "status": true},
+		{"id": "2", "pillName": "Cetrine", "dueDate": "2024-11-28", "status": false},
+		{"id": "3", "pillName": "Berocca", "dueDate": "2024-11-30", "status": true}
+	]`
+
+	if err := json.Unmarshal([]byte(jsonData), &records); err != nil {
+		log.Fatalf("Ошибка парсинга JSON: %v", err)
+	}
 }
 
 // mustParseDate parses a date string and panics if there is an error.
-func mustParseDate(dateStr string) time.Time {
-	// Определите формат даты
-	var layout = "2006-01-02" // Пример формата: "YYYY-MM-DD"
-	t, err := time.Parse(layout, dateStr)
+func mustParseDate(dateStr string) (CustomDate, error) {
+	parsedTime, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
-		panic(err)
+		return CustomDate{}, err
 	}
-	return t
+	return CustomDate{parsedTime}, nil
 }
 
 func main() {
@@ -61,15 +86,29 @@ func getRecords(c *gin.Context) {
 		filteredRecords = filterByName(filteredRecords, pillName)
 	}
 	if dueDate != "" {
-		date := mustParseDate(dueDate)
+		date, error := mustParseDate(dueDate)
+		if error != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"message": error.Error()})
+			return
+		}
 		filteredRecords = filterByDate(filteredRecords, date)
 	}
 	if statusStr != "" {
-		status, _ := strconv.ParseBool(statusStr)
+		status, error := strconv.ParseBool(statusStr)
+		if error != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"message": error.Error()})
+			return
+		}
 		filteredRecords = filterByStatus(filteredRecords, status)
 	}
 	if fromDate != "" && toDate != "" {
-		filteredRecords = filterByInterval(filteredRecords, mustParseDate(fromDate), mustParseDate(toDate))
+		from, error := mustParseDate(fromDate)
+		to, error := mustParseDate(toDate)
+		if error != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"message": error.Error()})
+			return
+		}
+		filteredRecords = filterByInterval(filteredRecords, from, to)
 	}
 	c.IndentedJSON(http.StatusOK, filteredRecords)
 }
@@ -81,6 +120,7 @@ func createRecord(c *gin.Context) {
 	// Call BindJSON to bind the received JSON to
 	// newAlbum.
 	if err := c.BindJSON(&newRecord); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 	// Check if record exists
@@ -130,13 +170,17 @@ func deleteRecordByID(c *gin.Context) {
 // updateRecordByID updates a record from the list
 func updateRecordByID(c *gin.Context) {
 	id := c.Param("id")
-
+	// c.Request.Body
+	// dueDate := c.Body("dueDate")
+	// fromDate := c.Query("fromDate")
+	// toDate := c.Query("toDate")
 	// Loop through the list of albums, looking for
 	// an album whose ID value matches the parameter.
 	for i, a := range records {
 		if a.ID == id {
 			var updatedRecord record
 			if err := c.BindJSON(&updatedRecord); err != nil {
+				c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 				return
 			}
 			records[i] = record{

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -12,12 +13,18 @@ import (
 )
 
 func TestGetRecords(t *testing.T) {
-	// records slice to seed record album data.
-	var records = []record{
-		{ID: "1", PillName: "Yarina", DueDate: mustParseDate("2024-11-28"), Status: true},
-		{ID: "2", PillName: "Cetrine", DueDate: mustParseDate("2024-11-29"), Status: false},
-		{ID: "3", PillName: "Berocca", DueDate: mustParseDate("2024-11-27"), Status: true},
+
+	var records []record
+	jsonData := `[
+		{"id": "1", "pillName": "Yarina", "dueDate": "2024-11-29", "status": true},
+		{"id": "2", "pillName": "Cetrine", "dueDate": "2024-11-28", "status": false},
+		{"id": "3", "pillName": "Berocca", "dueDate": "2024-11-30", "status": true}
+	]`
+
+	if err := json.Unmarshal([]byte(jsonData), &records); err != nil {
+		log.Fatalf("Ошибка парсинга JSON: %v", err)
 	}
+
 	// Создаем тестовый маршрутизатор
 	router := gin.Default()
 	router.GET("/records", getRecords)
